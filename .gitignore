@@ -45,3 +45,11 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+/target/
+/bin/
+/target/
+
+*.classpath
+*.project
+.settings/org.eclipse.m2e.core.prefs
+*.prefs
