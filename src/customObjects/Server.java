@@ -1,6 +1,7 @@
 package customObjects;
 
 import java.util.ArrayList;
+import java.util.TimeZone;
 
 import customObjects.Exceptions.RepeatedTimezoneException;
 
@@ -13,9 +14,9 @@ public class Server {
 
 	private long id; // guild id
 	private String name; // server name
-	private ArrayList<Timezone> timezones = new ArrayList<Timezone>();
+	private ArrayList<TimeZone> timezones = new ArrayList<TimeZone>();
 
-	public Server(long id, String name, ArrayList<Timezone> timezones)
+	public Server(long id, String name, ArrayList<TimeZone> timezones)
 	{
 		super();
 		this.id = id;
@@ -24,7 +25,7 @@ public class Server {
 	}
 
 	// Adds a timezone to the array, throws a RepeatedTimezoneException
-	public void addTimezone(Timezone timezone) throws RepeatedTimezoneException
+	public void addTimezone(TimeZone timezone) throws RepeatedTimezoneException
 	{
 		Boolean repeat = false;
 		for (int i = 0; i < timezones.size(); i++)
