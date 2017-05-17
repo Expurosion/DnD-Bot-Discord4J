@@ -11,11 +11,11 @@ import customObjects.Exceptions.RepeatedTimezoneException;
 public class Server {
 
 
-	private String id; // guild id
+	private long id; // guild id
 	private String name; // server name
 	private ArrayList<Timezone> timezones = new ArrayList<Timezone>();
 
-	public Server(String id, String name, ArrayList<Timezone> timezones)
+	public Server(long id, String name, ArrayList<Timezone> timezones)
 	{
 		super();
 		this.id = id;
@@ -44,7 +44,7 @@ public class Server {
 		}
 	}
 
-	public String getId()
+	public long getId()
 	{
 		return id;
 	}
