@@ -9,7 +9,7 @@ public class Main {
 
 	public static void main(String[] args)
 	{
-		String token = "MzEyMjcxMDYyODUzNDg0NTQ3.C_0i6Q.K45J7FihibrXpGqVXGfggPqSjoY";
+		String token = args[0];
 		IDiscordClient discordClient = new ClientBuilder().withToken(token).login();
 		try
 		{
