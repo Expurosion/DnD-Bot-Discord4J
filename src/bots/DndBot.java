@@ -1,7 +1,10 @@
 package bots;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.TimeZone;
 
+import customObjects.Offset;
 import customObjects.Database.DBO;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventDispatcher;
@@ -14,6 +17,7 @@ public class DndBot extends BaseBot implements IListener<MessageReceivedEvent> {
 
 
 	private DBO dbo;
+	final String help = " Type '!help timezone' for more details.";
 
 	public DndBot(IDiscordClient discordClient) throws SQLException
 	{
@@ -38,7 +42,7 @@ public class DndBot extends BaseBot implements IListener<MessageReceivedEvent> {
 		if (command.equals("!ping"))
 		{
 			output("Pong!", channel);
-			output("" + guild.getLongID(), channel);
+			output("ServerID:" + guild.getLongID(), channel);
 		}
 		else if (command.equals("!time"))
 		{
@@ -52,14 +56,45 @@ public class DndBot extends BaseBot implements IListener<MessageReceivedEvent> {
 		{
 			if (msg.length == 1)
 			{
-				// TODO output the different help commands
+				output(help(), channel);
 			}
 			else
 			{
-				String action = msg[1];
-
+				String action = msg[1].toLowerCase();
+				output(help(action), channel);
 			}
 		}
+	}
+
+	private String help()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private String help(String action)
+	{
+		// TODO Auto-generated method stub
+		String output = "";
+		if (action.equals("time"))
+		{
+			output = "";
+		}
+		else if (action.equals("timezone"))
+		{
+			output = "Actions: add, delete, getall \n" + "  add: Adds a timezone to the server.\n"
+					+ "    Format: '!timezone add %timezone%'. \n"
+					+ "    Appropriate timezones can be found on http://joda-time.sourceforge.net/timezones.html  \n"
+					+ "  delete: Deletes a timezone from the server.\n"
+					+ "    Format: '!timezone delete %timezone%' \n"
+					+ "  getall: Gets all timezones associated with the server.\n"
+					+ "    Format: '!timezone getall' \n";
+		}
+		else if (action.equals("ping"))
+		{
+			output = "Returns a message with the value 'Pong!' for testing purposes, and the server'd ID.";
+		}
+		return output;
 	}
 
 	private void output(String output, IChannel channel)
@@ -102,63 +137,94 @@ public class DndBot extends BaseBot implements IListener<MessageReceivedEvent> {
 
 	private String timezone(String[] msg, IGuild guild)
 	{
-		String output = null;
-		String help = " Type '!help timezone' for more details.";
+		String output = "";
 
 		if (msg.length > 1)
 		{
-			String action = msg[1];
-			if (msg.length > 2)
+			String action = msg[1].toLowerCase();
+			if (action.equals("add")) // adds a timezone to the server's database
 			{
-				if (action.equals("add"))
+				if (msg.length == 3)
 				{
 					String timeZoneName = msg[2];
-					if (msg.length > 3)
+					String[] tzs = TimeZone.getAvailableIDs();
+					Boolean added = false;
+					for (String timeZone : tzs)
 					{
-						// TODO create TimeZone object
-						if (msg[3].startsWith("+"))
+						if (timeZoneName.equals(timeZone))
 						{
-
-						}
-						else if (msg[3].startsWith("-"))
-						{
-
-						}
-						else
-						{
-							output = "Invalid time!" + help;
+							added = true;
+							TimeZone tz = TimeZone.getTimeZone(timeZoneName);
+							Boolean notRepeat = dbo.addTimeZone(tz, guild.getLongID());
+							output = "Added " + tz.getDisplayName();
+							if (!notRepeat)
+							{
+								output = "Repeated timezone!" + help;
+							}
 						}
 					}
-					else
+
+					if (!added)
 					{
-						output = "Must input a time!" + help;
+						output = "Invalid timezone!" + help;
 					}
-				}
-				else if (action.equals("edit"))
-				{
-					// TODO add 'edit' functionality
-				}
-				else if (action.equals("delete"))
-				{
-					// TODO add 'delete' functionality
 				}
 				else
 				{
-					output = "Invalid argument!" + help;
+					output = "Must specify a timezone to add!" + help;
+				}
+			}
+
+			else if (action.equals("delete")) // deletes a timezone from the server's database
+			{
+				if (msg.length == 3)
+				{
+					String timeZoneName = msg[2];
+					Boolean deleted = dbo.deleteTimeZone(timeZoneName, guild.getLongID());
+					if (deleted)
+					{
+						output = "Deleted " + timeZoneName;
+					}
+					else
+					{
+						output = "Timezone not associated with server!" + help;
+					}
+				}
+				else
+				{
+					output = "Must specify a timezone to delete!" + help;
+				}
+			}
+
+			else if (action.equals("getall")) // outputs all timezones associated with the server
+			{
+				ArrayList<TimeZone> timezones = dbo.getTimeZones(guild.getLongID());
+				for (int i = 0; i < timezones.size(); i++)
+				{
+					TimeZone timezone = timezones.get(i);
+					Offset offset = new Offset(timezone.getRawOffset());
+
+					output = output + timezone.getID() + offset.getSign() + offset.getHour() + ":"
+							+ offset.getMinute();
+
+					// add a comma and space if not the last item in the array
+					if (i < timezones.size() - 1)
+					{
+						output = output + ", ";
+					}
+				}
+				if (timezones.size() == 0)
+				{
+					output = "No timezones associated with this server!" + help;
 				}
 			}
 			else
 			{
-				if (action.equals("add"))
-				{
-					output = "Must specify a timezone to add!";
-				}
-				else
-				{
-					output = "Must specify a timezone to modify!";
-				}
+				output = "Invalid action!" + help;
 			}
 		}
+
+		// No action specified
 		else
 		{
 			output = "Must specify an action." + help;

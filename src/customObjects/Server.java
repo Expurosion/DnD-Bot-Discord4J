@@ -55,6 +55,11 @@ public class Server {
 		return name;
 	}
 
+	public ArrayList<TimeZone> getTimezones()
+	{
+		return timezones;
+	}
+
 	public void setName(String name)
 	{
 		this.name = name;
